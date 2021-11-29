@@ -1,6 +1,2 @@
-def main():
+def lambda_handler(event, context):
     print("hello world")
-
-
-if __name__ == "__main__":
-    main()

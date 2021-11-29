@@ -26,3 +26,14 @@ start:
 	@echo ""
 	python main.py
 
+## build: package app for aws lambda
+.PHONY: build
+build:
+	./build.sh
+
+## deploy: deploy function code to aws lambda
+.PHONY: deploy
+deploy: build
+	aws lambda update-function-code \
+		--function-name ${FUNCTION_NAME} \
+		--zip-file fileb://lambda.zip
