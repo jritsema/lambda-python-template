@@ -7,12 +7,11 @@ This is intended to provide a basic project template for deploying Python functi
 setup
 ```sh
 make init
-export FUNCTION_NAME=my-lambda-function
 ```
 
 deploy
 ```sh
-make deploy
+make deploy function=my-function
 ```
 
 ```
@@ -24,3 +23,4 @@ make deploy
   build     package app for aws lambda
   deploy    deploy function code to aws lambda
 ```
+

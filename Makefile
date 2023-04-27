@@ -31,9 +31,10 @@ start:
 build:
 	./build.sh
 
-## deploy: deploy function code to aws lambda
+## deploy: deploy function code to aws lambda - make deploy function=my-function
 .PHONY: deploy
 deploy: build
 	aws lambda update-function-code \
-		--function-name ${FUNCTION_NAME} \
+		--function-name ${function} \
 		--zip-file fileb://lambda.zip
+
