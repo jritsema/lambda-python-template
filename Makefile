@@ -17,6 +17,7 @@ init:
 ## install: install project dependencies
 .PHONY: install
 install:
+	python3 -m pip install --upgrade pip
 	pip install -r requirements.txt
 
 ## start: run local project
@@ -26,15 +27,29 @@ start:
 	@echo ""
 	python main.py
 
-## build: package app for aws lambda
-.PHONY: build
-build:
-	./build.sh
+## build-zip: package app for aws lambda using zip
+.PHONY: build-zip
+build-zip:
+	./zip.sh
 
-## deploy: deploy function code to aws lambda - make deploy function=my-function
-.PHONY: deploy
-deploy: build
-	aws lambda update-function-code \
-		--function-name ${function} \
-		--zip-file fileb://lambda.zip
+## deploy-zip: deploy code to lambda as zip - make deploy-zip function=my-function
+.PHONY: deploy-zip
+deploy-zip: build-zip
+	aws lambda update-function-code --function-name ${function} --zip-file fileb://lambda.zip
 
+## build-container: package app for aws lambda using container
+.PHONY: build-container
+build-container:
+	docker build -t lambda .
+
+## start-container: run local project in container
+.PHONY: start-container
+start-container: build-container
+	clear
+	@echo ""
+	docker run -it --rm -p 8080:8080 lambda
+
+## deploy-container: deploy code to lambda as container - make deploy-container function=my-function
+.PHONY: deploy-container
+deploy-container: build-container
+	./deploy.sh ${function}
