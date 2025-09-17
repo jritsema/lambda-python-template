@@ -1,3 +1,5 @@
+ROLE_NAME = lambda-basic-execution
+
 all: help
 
 .PHONY: help
@@ -11,13 +13,13 @@ help: Makefile
 ## init: run this once to initialize a new python project
 .PHONY: init
 init:
-	python3 -m venv .venv
+	python -m venv .venv
 	direnv allow .
 
 ## install: install project dependencies
 .PHONY: install
 install:
-	python3 -m pip install --upgrade pip
+	python -m pip install --upgrade pip
 	pip install -r requirements.txt
 
 ## start: run local project
@@ -31,6 +33,27 @@ start:
 .PHONY: build-zip
 build-zip:
 	./zip.sh
+
+## role: creates the lambda execution role
+.PHONY: role
+role:
+	aws iam create-role --role-name ${ROLE_NAME} --assume-role-policy-document '{"Version": "2012-10-17","Statement": [{"Effect": "Allow","Principal": {"Service": "lambda.amazonaws.com"},"Action": "sts:AssumeRole"}]}' || true
+	aws iam attach-role-policy --role-name ${ROLE_NAME} --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole || true
+
+## create: creates the lambda function - make create function=my-function
+.PHONY: create
+create: build-zip role
+	aws lambda create-function \
+		--function-name ${function} \
+		--runtime python3.13 \
+		--handler lambda_function.lambda_handler \
+		--role $$(aws sts get-caller-identity --query Account --output text | xargs -I {} echo "arn:aws:iam::{}:role/${ROLE_NAME}") \
+		--zip-file fileb://lambda.zip
+
+## delete: deletes the lambda function - make delete function=my-function
+.PHONY: delete
+delete:
+	aws lambda delete-function --function-name ${function}
 
 ## deploy-zip: deploy code to lambda as zip - make deploy-zip function=my-function
 .PHONY: deploy-zip
@@ -53,3 +76,13 @@ start-container: build-container
 .PHONY: deploy-container
 deploy-container: build-container
 	./deploy.sh ${function}
+
+## invoke: invoke the lambda function - make invoke function=my-function
+.PHONY: invoke
+invoke:
+	aws lambda invoke \
+		--function-name ${function} \
+		--payload file://request.json \
+		--cli-binary-format raw-in-base64-out \
+		response.json
+	cat response.json
