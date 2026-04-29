@@ -43,6 +43,8 @@ role:
 ## create: creates the lambda function - make create function=my-function
 .PHONY: create
 create: build-zip role
+	@echo "Waiting for IAM role to propagate..."
+	sleep 10
 	aws lambda create-function \
 		--function-name ${function} \
 		--runtime python3.13 \
