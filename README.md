@@ -2,7 +2,7 @@
 
 Quick starter template for new aws lambda python projects.
 
-This is intended to provide a basic project template for deploying Python functions to AWS Lambda. This template is focused on deploying code changes to Lambda. Creating the Lambda function typically involves using an IaC tool like Terraform, CloudFormation, or CDK, however, for convenience, this template contains a make create command to also create a function.
+This is intended to provide a basic project template for deploying Python functions to AWS Lambda. This template is focused on deploying code changes to Lambda. Creating the Lambda function typically involves using an IaC tool like Terraform, CloudFormation, or CDK, however, for convenience, this template contains make commands for quick operations.
 
 ## Local
 
@@ -38,23 +38,32 @@ curl -X POST "http://localhost:8080/2015-03-31/functions/function/invocations" -
 Optionally create the lambda function (IaC is recommended instead)
 
 ```sh
+# container (default)
 make create function=my-function
+
+# zip
+make create function=my-function packaging=zip
 ```
+
+> **Note:** The default architecture is `arm64`. To use x86, pass `arch=x86_64`:
+> ```sh
+> make create function=my-function arch=x86_64
+> ```
 
 ### Deploy Code Changes
 
-Template supports both container and zip formats
-
-#### Container
-
 ```sh
-make deploy-container function=my-function
+# container (default)
+make deploy function=my-function
+
+# zip
+make deploy function=my-function packaging=zip
 ```
 
-#### Zip
+## Invoke
 
 ```sh
-make deploy-zip function=my-function
+make invoke function=my-function
 ```
 
 ## Clean up
@@ -72,13 +81,12 @@ make delete function=my-function
   init               run this once to initialize a new python project
   install            install project dependencies
   start              run local project
-  build-zip          package app for aws lambda using zip
+  build              package app for aws lambda - make build [packaging=zip]
   role               creates the lambda execution role
-  create             creates the lambda function - make create function=my-function
+  create             creates the lambda function - make create function=my-function [packaging=zip] [arch=x86_64]
   delete             deletes the lambda function - make delete function=my-function
-  deploy-zip         deploy code to lambda as zip - make deploy-zip function=my-function
-  build-container    package app for aws lambda using container
+  deploy             deploy code to lambda - make deploy function=my-function [packaging=zip]
   start-container    run local project in container
-  deploy-container   deploy code to lambda as container - make deploy-container function=my-function
+  push               push container image to ECR - make push function=my-function
   invoke             invoke the lambda function - make invoke function=my-function
 ```

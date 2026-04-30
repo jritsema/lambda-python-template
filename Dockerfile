@@ -1,4 +1,5 @@
-FROM public.ecr.aws/lambda/python:3.13
+ARG PYTHON_VERSION=3.13
+FROM public.ecr.aws/lambda/python:${PYTHON_VERSION}
 
 COPY requirements.txt ./
 RUN pip install --upgrade pip
